@@ -21,8 +21,8 @@ interface PlayStatsDao {
     @Query(
         """
         UPDATE play_stats
-        SET totalThrows = totalThrows + :throws,
-            totalBounces = totalBounces + :bounces,
+        SET totalThrows = totalThrows + :throwsDelta,
+            totalBounces = totalBounces + :bouncesDelta,
             totalPlayTimeMs = totalPlayTimeMs + :playTimeMs,
             bestAirTimeMs = CASE WHEN :airTimeMs > bestAirTimeMs THEN :airTimeMs ELSE bestAirTimeMs END,
             lastEntity = :lastEntity,
@@ -31,8 +31,8 @@ interface PlayStatsDao {
         """
     )
     suspend fun accumulate(
-        throws: Long,
-        bounces: Long,
+        throwsDelta: Long,
+        bouncesDelta: Long,
         playTimeMs: Long,
         airTimeMs: Long,
         lastEntity: String,

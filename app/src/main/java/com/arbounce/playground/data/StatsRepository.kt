@@ -76,8 +76,8 @@ class StatsRepository(
         if (t == 0L && b == 0L && p == 0L && air == 0L) return@withContext
         pendingThrows = 0; pendingBounces = 0; pendingPlayMs = 0; pendingBestAirMs = 0
         dao.accumulate(
-            throws = t,
-            bounces = b,
+            throwsDelta = t,
+            bouncesDelta = b,
             playTimeMs = p,
             airTimeMs = air,
             lastEntity = lastEntity,
