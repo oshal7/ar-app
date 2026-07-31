@@ -1,0 +1,90 @@
+name: Build & Release APK
+
+# Builds a signed release APK and publishes it as a downloadable GitHub Release
+# asset. Runs when you push a version tag (vX.Y.Z) or click "Run workflow".
+on:
+  push:
+    branches:
+      - 'claude/**'          # validate the build on every push to the dev branch
+    tags:
+      - 'v*.*.*'             # publish a Release when a version tag is pushed
+  workflow_dispatch:          # or publish on demand from the Actions tab
+
+permissions:
+  contents: write   # needed to create Releases and tags
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install SDK packages
+        run: |
+          yes | sdkmanager --licenses >/dev/null 2>&1 || true
+          sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0" >/dev/null
+
+      - name: Compute version & names
+        id: ver
+        run: |
+          VN=$(grep '^VERSION_NAME=' version.properties | cut -d'=' -f2 | tr -d '[:space:]')
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            TAG="${{ github.ref_name }}"
+          else
+            TAG="v${VN}"
+          fi
+          APK="ar-flight-and-bounce-${TAG}.apk"
+          echo "version_name=$VN" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "apk=$APK" >> "$GITHUB_OUTPUT"
+          echo "Building $APK (versionName=$VN, code base + run #${{ github.run_number }})"
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Build signed release APK
+        env:
+          CI_RUN_NUMBER: ${{ github.run_number }}
+        run: ./gradlew assembleRelease --stacktrace
+
+      - name: Rename APK
+        run: cp app/build/outputs/apk/release/app-release.apk "${{ steps.ver.outputs.apk }}"
+
+      - name: Upload APK as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.ver.outputs.apk }}
+          path: ${{ steps.ver.outputs.apk }}
+          if-no-files-found: error
+
+      - name: Publish GitHub Release with APK
+        # Only publish a Release for version tags or manual runs — plain branch
+        # pushes just build + upload the artifact to validate compilation.
+        if: github.ref_type == 'tag' || github.event_name == 'workflow_dispatch'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.ver.outputs.tag }}
+          name: AR Bounce ${{ steps.ver.outputs.tag }}
+          body: |
+            **AR Flight & Bounce** — signed release APK.
+
+            Download `${{ steps.ver.outputs.apk }}` below, open it on your Android
+            phone, and install (allow "install unknown apps" if prompted).
+
+            versionName: `${{ steps.ver.outputs.version_name }}`
+            versionCode: `run #${{ github.run_number }}` (auto-incrementing)
+
+            Updates install over any previous version **without deleting your data**,
+            because every build is signed with the same key.
+          files: ${{ steps.ver.outputs.apk }}
+          generate_release_notes: true

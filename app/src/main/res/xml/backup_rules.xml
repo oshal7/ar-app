@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Allow auto-backup so cloud restores also keep captured stats. -->
+<full-backup-content>
+    <include domain="database" path="ar_bounce.db" />
+    <include domain="sharedpref" path="." />
+</full-backup-content>

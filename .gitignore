@@ -1,0 +1,19 @@
+# Build outputs
+.gradle/
+build/
+app/build/
+/local.properties
+/captures/
+.externalNativeBuild/
+.cxx/
+
+# IDE
+.idea/
+*.iml
+
+# OS
+.DS_Store
+
+# NOTE: keystore/release.jks is intentionally NOT ignored.
+# It is committed on purpose so every CI build signs with the SAME key,
+# which is what lets Android update the app in place without wiping data.

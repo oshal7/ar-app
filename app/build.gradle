@@ -1,0 +1,85 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+    id 'org.jetbrains.kotlin.kapt'
+}
+
+// ---- Versioning: read from /version.properties (single source of truth) ----
+def versionProps = new Properties()
+def versionPropsFile = rootProject.file("version.properties")
+if (versionPropsFile.exists()) {
+    versionProps.load(new FileInputStream(versionPropsFile))
+}
+def appVersionName = versionProps.getProperty("VERSION_NAME", "0.0.1")
+def versionCodeBase = (versionProps.getProperty("VERSION_CODE_BASE", "1000")).toInteger()
+// CI provides a monotonically increasing run number; fall back to base locally.
+def ciRunNumber = (System.getenv("CI_RUN_NUMBER") ?: "0").toInteger()
+def computedVersionCode = versionCodeBase + ciRunNumber
+
+android {
+    namespace 'com.arbounce.playground'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.arbounce.playground"
+        minSdk 24            // ARCore requires API 24+
+        targetSdk 34
+        versionCode computedVersionCode
+        versionName appVersionName
+        vectorDrawables.useSupportLibrary = true
+    }
+
+    // Stable signing so updates install over the existing app and keep data.
+    signingConfigs {
+        release {
+            storeFile rootProject.file("keystore/release.jks")
+            storePassword "arbounce2026"
+            keyAlias "arbounce"
+            keyPassword "arbounce2026"
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            // Debug also uses the stable release key so side-loaded debug/release
+            // builds share a signature and can update over one another.
+            signingConfig signingConfigs.release
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+    buildFeatures {
+        viewBinding true
+    }
+}
+
+dependencies {
+    implementation 'androidx.core:core-ktx:1.13.1'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'com.google.android.material:material:1.12.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.8.4'
+    implementation 'androidx.activity:activity-ktx:1.9.1'
+
+    // ARCore
+    implementation 'com.google.ar:core:1.42.0'
+
+    // Room (persistence with migrations for data retention)
+    implementation 'androidx.room:room-runtime:2.6.1'
+    implementation 'androidx.room:room-ktx:2.6.1'
+    kapt 'androidx.room:room-compiler:2.6.1'
+
+    // Coroutines
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1'
+}

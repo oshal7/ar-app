@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">AR Bounce</string>
+
+    <string name="hud_scanning">Move your phone slowly to scan surfaces…</string>
+    <string name="hud_ready">Tap or fling to throw the ball</string>
+    <string name="btn_reset">Reset</string>
+    <string name="btn_ball">Ball</string>
+    <string name="btn_plane">Plane</string>
+    <string name="btn_bird">Bird</string>
+    <string name="soon">coming soon</string>
+
+    <string name="stats_throws">Throws: %1$d</string>
+    <string name="stats_bounces">Bounces: %1$d</string>
+    <string name="stats_best_air">Best air time: %1$.1fs</string>
+
+    <string name="fallback_title">AR not available on this device</string>
+    <string name="fallback_body">Your device doesn\'t support ARCore, so AR mode is off. You can still play the tilt-and-bounce mini game below — your stats are shared with AR mode.</string>
+
+    <string name="ar_unavailable">ARCore is not available. Switching to fallback mode.</string>
+    <string name="ar_install_requested">Installing Google Play Services for AR…</string>
+    <string name="camera_needed">Camera permission is required for AR mode.</string>
+</resources>

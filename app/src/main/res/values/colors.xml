@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="accent">#FF4FC3F7</color>
+    <color name="accent_dark">#FF0288D1</color>
+    <color name="hud_scrim">#66000000</color>
+    <color name="ball_orange">#FFFF7043</color>
+    <color name="ic_launcher_background">#FF102027</color>
+</resources>
